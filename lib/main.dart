@@ -62,7 +62,7 @@ class Dock<T> extends StatefulWidget {
 }
 
 class _DockState<T> extends State<Dock<T>> {
-  late List<T> _items = widget.items.toList();
+  late final List<T> _items = widget.items.toList();
   Offset mousePosition = Offset.infinite;
   int? draggingIndex;
 
@@ -105,10 +105,11 @@ class _DockState<T> extends State<Dock<T>> {
                     child: widget.builder(icon, false, 1.2),
                   ),
                   childWhenDragging: widget.builder(icon, true, 1.0),
+
                   child: DragTarget<int>(
-                    onAccept: (fromIndex) {
+                    onAcceptWithDetails: (fromIndex) {
                       setState(() {
-                        final item = _items.removeAt(fromIndex);
+                        final item = _items.removeAt(fromIndex as int);
                         _items.insert(index, item);
                       });
                     },
