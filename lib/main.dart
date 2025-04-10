@@ -62,65 +62,58 @@ class Dock<T> extends StatefulWidget {
 }
 
 class _DockState<T> extends State<Dock<T>> {
-  late final List<T> _items = widget.items.toList();
+  late List<T> _items = widget.items.toList();
   Offset mousePosition = Offset.infinite;
   int? draggingIndex;
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: MouseRegion(
-          onHover: (event) {
-            setState(() => mousePosition = event.position);
-          },
-          onExit: (_) {
-            setState(() => mousePosition = Offset.infinite);
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.black12,
-            ),
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(_items.length, (index) {
-                final icon = _items[index];
-                final iconWidth = 64;
-                final dockWidth = iconWidth * _items.length;
-                final dockStart = (MediaQuery.of(context).size.width - dockWidth) / 2;
-                final iconCenterX = dockStart + iconWidth * index + iconWidth / 2;
-                final distance = (mousePosition.dx - iconCenterX).abs();
-                final scale = max(1.0, 1.6 - (distance / 150).clamp(0, 1));
+    return MouseRegion(
+      onHover: (event) {
+        setState(() => mousePosition = event.position);
+      },
+      onExit: (_) {
+        setState(() => mousePosition = Offset.infinite);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.black12,
+        ),
+        padding: const EdgeInsets.all(4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(_items.length, (index) {
+            final icon = _items[index];
+            final iconWidth = 64.0;
+            final dockWidth = iconWidth * _items.length;
+            final dockStart = (MediaQuery.of(context).size.width - dockWidth) / 2;
+            final iconCenterX = dockStart + iconWidth * index + iconWidth / 2;
+            final distance = (mousePosition.dx - iconCenterX).abs();
+            final scale = max(1.0, 1.6 - (distance / 150).clamp(0, 1));
 
-                return Draggable<int>(
-                  data: index,
-                  onDragStarted: () => setState(() => draggingIndex = index),
-                  onDragEnd: (_) => setState(() => draggingIndex = null),
-                  feedback: Material(
-                    color: Colors.transparent,
-                    child: widget.builder(icon, false, 1.2),
-                  ),
-                  childWhenDragging: widget.builder(icon, true, 1.0),
-
-                  child: DragTarget<int>(
-                    onAcceptWithDetails: (fromIndex) {
-                      setState(() {
-                        final item = _items.removeAt(fromIndex as int);
-                        _items.insert(index, item);
-                      });
-                    },
-                    builder: (_, __, ___) {
-                      return widget.builder(icon, false, scale);
-                    },
-                  ),
-                );
-              }),
-            ),
-          ),
+            return Draggable<int>(
+              data: index,
+              onDragStarted: () => setState(() => draggingIndex = index),
+              onDragEnd: (_) => setState(() => draggingIndex = null),
+              feedback: Material(
+                color: Colors.transparent,
+                child: widget.builder(icon, false, 1.2),
+              ),
+              childWhenDragging: widget.builder(icon, true, 1.0),
+              child: DragTarget<int>(
+                onAccept: (fromIndex) {
+                  setState(() {
+                    final item = _items.removeAt(fromIndex);
+                    _items.insert(index, item);
+                  });
+                },
+                builder: (_, __, ___) {
+                  return widget.builder(icon, false, scale);
+                },
+              ),
+            );
+          }),
         ),
       ),
     );
